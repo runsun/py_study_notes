@@ -1,0 +1,167 @@
+<div id="doc" class="markdown-body container-fluid comment-enabled" data-hard-breaks="true"><h1 id="Learning-the-python-Click-module" data-id="Learning-the-python-Click-module"><span>Learning the python Click module</span></h1><p><span>Ref:</span><a href="https://pymbook.readthedocs.io/en/latest/click.html" target="_blank" rel="noopener"><span>Building commandline appplication with Click</span></a></p><h2 id="Using-virtualenv" data-id="Using-virtualenv"><span>Using </span><em><span>virtualenv</span></em></h2><ol>
+<li><span>Create a new folder</span></li>
+</ol><pre><code> ..&gt; mkdir click
+ ..&gt; cd click
+ ..\click&gt; 
+</code></pre><ol start="2">
+<li><span>Create a </span><em><a href="http://hello.py" target="_blank" rel="noopener"><span>hello.py</span></a></em></li>
+</ol><pre><code class="python hljs"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">cli</span><span class="hljs-params">()</span>:</span>
+  print(<span class="hljs-string">'Hello World'</span>)
+</code></pre><ol start="3">
+<li><span>Create a </span><em><a href="http://setup.py" target="_blank" rel="noopener"><span>setup.py</span></a></em><span> file</span><br>
+<span>Recommended way to write command line tools, then directly using </span><em><span>shebang-based</span></em><span> scripts.</span></li>
+</ol><pre><code class="python hljs"><span class="hljs-keyword">from</span> setuptools <span class="hljs-keyword">import</span> setup
+
+setup(
+    name=<span class="hljs-string">"myhello"</span>,
+    version=<span class="hljs-string">'0.1'</span>,
+    py_modules=[<span class="hljs-string">'hello'</span>],
+    install_requires=[
+        <span class="hljs-string">'Click'</span>,
+    ],
+    entry_points=<span class="hljs-string">'''
+        [console_scripts]
+        myhello=hello:cli
+    '''</span>,
+)
+</code></pre><pre><code class="python hljs">$ python3 -m venv env
+$ source env/bin/activate
+$ python3 -m pip install --editable .
+Obtaining file:///home/kdas/code/practice/yoclick
+Collecting Click (<span class="hljs-keyword">from</span> myhello==<span class="hljs-number">0.1</span>)
+Using cached click<span class="hljs-number">-6.7</span>-py2.py3-none-any.whl
+Installing collected packages: Click, myhello
+Running setup.py develop <span class="hljs-keyword">for</span> myhello
+Successfully installed Click<span class="hljs-number">-6.7</span> myhello
+
+$ myhello
+Hello World
+</code></pre><ol start="4">
+<li><span>If convert the same script to click-bsased tool, we have:</span></li>
+</ol><pre><code class="shell hljs"><span class="hljs-meta">$</span><span class="bash"> myhello</span>
+Hello World
+<span class="hljs-meta">$</span><span class="bash"> myhello --<span class="hljs-built_in">help</span></span>
+Usage: myhello [OPTIONS]
+
+Options:
+--help  Show this message and exit.
+</code></pre><h2 id="The-Click-module-suggests-using-echo-in-place-of-print" data-id="The-Click-module-suggests-using-echo-in-place-of-print"><span>The Click module suggests using </span><em><span>echo</span></em><span> in place of </span><em><span>print</span></em></h2><pre><code class="python hljs"><span class="hljs-keyword">import</span> click
+
+<span class="hljs-meta">@click.command()</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">cli</span><span class="hljs-params">()</span>:</span>
+    click.echo(<span class="hljs-string">"Hello World"</span>)
+</code></pre><h2 id="Using-boolean-flags" data-id="Using-boolean-flags"><span>Using boolean flags</span></h2><pre><code class="python hljs"><span class="hljs-keyword">import</span> click
+
+<span class="hljs-meta">@click.command()</span>
+<span class="hljs-meta">@click.option('--verbose', is_flag=True, help="Will print verbose messages.")</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">cli</span><span class="hljs-params">(verbose)</span>:</span>
+    <span class="hljs-keyword">if</span> verbose:
+        click.echo(<span class="hljs-string">"We are in the verbose mode."</span>)
+    click.echo(<span class="hljs-string">"Hello World"</span>)
+</code></pre><p><span>which gives:</span></p><pre><code class="shell hljs"><span class="hljs-meta">$</span><span class="bash"> myhello --<span class="hljs-built_in">help</span></span>
+Usage: myhello [OPTIONS]
+
+Options:
+--verbose  Will print verbose messages.
+--help     Show this message and exit.
+<span class="hljs-meta">$</span><span class="bash"> myhello --verbose</span>
+We are in the verbose mode.
+Hello World
+</code></pre><h2 id="Standard-options-take-input" data-id="Standard-options-take-input"><span>Standard options (take input)</span></h2><pre><code class="python hljs"><span class="hljs-keyword">import</span> click
+
+<span class="hljs-meta">@click.command()</span>
+<span class="hljs-meta">@click.option('--verbose', is_flag=True, help="Will print verbose messages.")</span>
+<span class="hljs-meta">@click.option('--name', default='', help='Who are you?')</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">cli</span><span class="hljs-params">(verbose,name)</span>:</span>
+    <span class="hljs-keyword">if</span> verbose:
+        click.echo(<span class="hljs-string">"We are in the verbose mode."</span>)
+    click.echo(<span class="hljs-string">"Hello World"</span>)
+    click.echo(<span class="hljs-string">'Bye {0}'</span>.format(name))
+</code></pre><p><span>Result:</span></p><pre><code class="shell hljs"><span class="hljs-meta">$</span><span class="bash"> myhello --<span class="hljs-built_in">help</span></span>
+Usage: myhello [OPTIONS]
+
+Options:
+--verbose    Will print verbose messages.
+--name TEXT  Who are you?
+--help       Show this message and exit.
+<span class="hljs-meta">$</span><span class="bash"> myhello</span>
+Hello World
+Bye
+<span class="hljs-meta">$</span><span class="bash"> myhello --name kushal</span>
+Hello World
+Bye kushal
+</code></pre><h2 id="Same-option-multiple-times--docstring" data-id="Same-option-multiple-times--docstring"><span>Same option multiple times + docstring</span></h2><pre><code class="python hljs"><span class="hljs-keyword">import</span> click
+
+<span class="hljs-meta">@click.command()</span>
+<span class="hljs-meta">@click.option('--verbose', is_flag=True, help="Will print verbose messages.")</span>
+<span class="hljs-meta">@click.option('--name', '-n', multiple=True, default='', help='Who are you?')</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">cli</span><span class="hljs-params">(verbose,name)</span>:</span>
+    <span class="hljs-string">"""This is an example script to learn Click."""</span>
+    <span class="hljs-keyword">if</span> verbose:
+        click.echo(<span class="hljs-string">"We are in the verbose mode."</span>)
+    click.echo(<span class="hljs-string">"Hello World"</span>)
+    <span class="hljs-keyword">for</span> n <span class="hljs-keyword">in</span> name:
+        click.echo(<span class="hljs-string">'Bye {0}'</span>.format(n))
+</code></pre><p><span>Result:</span></p><pre><code class="shell hljs"><span class="hljs-meta">$</span><span class="bash"> myhello --<span class="hljs-built_in">help</span></span>
+Usage: myhello [OPTIONS]
+
+This is an example script to learn Click.
+
+Options:
+--verbose        Will print verbose messages.
+-n, --name TEXT  Who are you?
+--help           Show this message and exit.
+</code></pre><h2 id="Super-fast-way-to-accept-password-w-confirmation" data-id="Super-fast-way-to-accept-password-w-confirmation"><span>Super fast way to accept password w/ confirmation</span></h2><pre><code class="python hljs"><span class="hljs-keyword">import</span> click
+
+<span class="hljs-meta">@click.command()</span>
+<span class="hljs-meta">@click.option('--verbose', is_flag=True, help="Will print verbose messages.")</span>
+<span class="hljs-meta">@click.option('--name', '-n', multiple=True, default='', help='Who are you?')</span>
+<span class="hljs-meta">@click.password_option()</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">cli</span><span class="hljs-params">(verbose,name, password)</span>:</span>
+    <span class="hljs-string">"""This is an example script to learn Click."""</span>
+    <span class="hljs-keyword">if</span> verbose:
+        click.echo(<span class="hljs-string">"We are in the verbose mode."</span>)
+    click.echo(<span class="hljs-string">"Hello World"</span>)
+    <span class="hljs-keyword">for</span> n <span class="hljs-keyword">in</span> name:
+        click.echo(<span class="hljs-string">'Bye {0}'</span>.format(n))
+        
+    <span class="hljs-comment"># Never do this in the real situation:    </span>
+    click.echo(<span class="hljs-string">'We received {0} as password.'</span>.format(password))
+    
+</code></pre><p><span>Output:</span></p><pre><code class="shell hljs"><span class="hljs-meta">$</span><span class="bash"> myhello --<span class="hljs-built_in">help</span></span>
+Usage: myhello [OPTIONS]
+
+This is an example script to learn Click.
+
+Options:
+--verbose        Will print verbose messages.
+-n, --name TEXT  Who are you?
+--password TEXT
+--help           Show this message and exit.
+<span class="hljs-meta">$</span><span class="bash"> myhello</span>
+Password:
+Repeat for confirmation:
+Hello World
+We received hello as password.
+</code></pre><h2 id="None-optional-arguments" data-id="None-optional-arguments"><span>None-optional arguments</span></h2><pre><code class="python hljs"><span class="hljs-keyword">import</span> click
+
+<span class="hljs-meta">@click.command()</span>
+<span class="hljs-meta">@click.option('--verbose', is_flag=True, help="Will print verbose messages.")</span>
+<span class="hljs-meta">@click.option('--name', '-n', multiple=True, default='', help='Who are you?')</span>
+<span class="hljs-meta">@click.argument('country') # default: a string</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">cli</span><span class="hljs-params">(verbose,name, country)</span>:</span>
+    <span class="hljs-string">"""This is an example script to learn Click."""</span>
+    <span class="hljs-keyword">if</span> verbose:
+        click.echo(<span class="hljs-string">"We are in the verbose mode."</span>)
+    click.echo(<span class="hljs-string">"Hello {0}"</span>.format(country))
+    <span class="hljs-keyword">for</span> n <span class="hljs-keyword">in</span> name:
+        click.echo(<span class="hljs-string">'Bye {0}'</span>.format(n))
+</code></pre><p><span>Output:</span></p><pre><code class="shell hljs"><span class="hljs-meta">$</span><span class="bash"> myhello</span>
+Usage: myhello [OPTIONS] COUNTRY
+
+Error: Missing argument "country".
+<span class="hljs-meta">$</span><span class="bash"> myhello India</span>
+Hello India
+</code></pre><h2 id="Further-reading" data-id="Further-reading"><span>Further reading:</span></h2><p><a href="https://palletsprojects.com/p/click/" target="_blank" rel="noopener"><span>Click Project</span></a><br>
+<a href="https://click.palletsprojects.com/en/7.x/" target="_blank" rel="noopener"><span>Click documation</span></a><br>
+<a href="https://lucumr.pocoo.org/about/" target="_blank" rel="noopener"><span>Author:Armin Ronacher</span></a></p></div>
